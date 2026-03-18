@@ -1,18 +1,20 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import * as React from 'react'
 import Link from 'next/link'
 import { Header } from '@/components/header'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 import { generateMockPassports, generateWeatherData } from '@/lib/mock-data'
-import { GRADE_INFO, CropGrade } from '@/lib/types'
+import { GRADE_INFO, CropGrade, DigitalPassport, WeatherData } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
-export default function DashboardPage() {
-  const [passports] = React.useState(() => generateMockPassports(5))
-  const [weather] = React.useState(() => generateWeatherData())
+function DashboardContent() {
+  const [passports] = React.useState<DigitalPassport[]>(() => generateMockPassports(5))
+  const [weather] = React.useState<WeatherData[]>(() => generateWeatherData())
 
   const stats = {
     totalHarvests: passports.length,
@@ -244,4 +246,41 @@ export default function DashboardPage() {
       </main>
     </div>
   )
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main className="container py-8">
+        <div className="mb-8">
+          <Skeleton className="h-9 w-64 mb-2" />
+          <Skeleton className="h-5 w-96" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Skeleton className="h-64" />
+          <Skeleton className="h-64 lg:col-span-2" />
+        </div>
+      </main>
+    </div>
+  )
+}
+
+const DynamicDashboard = dynamic(() => Promise.resolve(DashboardContent), {
+  ssr: false,
+  loading: () => <DashboardSkeleton />
+})
+
+export default function DashboardPage() {
+  return <DynamicDashboard />
 }
